@@ -60,6 +60,12 @@ def init_login():
         """Create user loader function."""
         return db.session.query(TrombiAdmin).get(user_id)
 
+class TrombiDatabaseStatus():
+    
+    def __init__(self, name):
+        """Simple constructor."""
+        self.name = name
+        self.children = []
 
 class MyAdminIndexView(flask_admin.AdminIndexView):
     """Create customized view class that handles login & registration."""
@@ -69,7 +75,23 @@ class MyAdminIndexView(flask_admin.AdminIndexView):
         """The root of the admin panel."""
         if not login.current_user.is_authenticated:
             return redirect(url_for('.login_view'))
-        return super(MyAdminIndexView, self).index()
+
+        status_list = []
+
+        persons = Person.query.all()
+
+        # Checking if someone is missing a superior
+        status = TrombiDatabaseStatus("Person with no superior")
+        for person in persons:
+            if (person.manager is None):
+                status.children.append(person)
+
+        status_list.append(status)
+        return self.render(
+            'admin/index.html',
+            status_list=status_list
+        )
+        # return super(MyAdminIndexView, self).index()
 
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):

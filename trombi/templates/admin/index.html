@@ -1,37 +1,56 @@
-{% extends 'admin/master.html' %}
-
-{% block body %}
-{{ super() }}
+{% extends 'admin/master.html' %} {% block body %} {{ super() }}
 <div class="row-fluid">
 
     <div>
         {% if current_user.is_authenticated %}
-        <h1>{{ gettext('Success') }}</h1>
-        <p class="lead">
-            {{ gettext('You are now logged in.') }}
-        </p>
-        {% else %}
-        <form method="POST" action="">
-            {{ form.hidden_tag() if form.hidden_tag }}
-            {% for f in form if f.type != 'CSRFTokenField' %}
-            <div>
-            {{ f.label }}
-            {{ f}}
-            {% if f.errors %}
+        <h1>Status</h1>
+        <p class="lead">Here's the current status of the trombi:</p>
+        <table style="width:100%">
+            {% for status in status_list %}
+            <tr>
+                <td>
+                    <div>
+                        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#persons{{ loop.index }}">{{ status.name }} [{{ status.children|length }}]</button>
+                        <div id="persons{{ loop.index }}" class="collapse">
+                            <table style="width:100%">
+                                {% for elt in status.children %}
+                                <tr>
+                                    <td>
+                                        {{ elt }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+
+
+
+    {% else %}
+    <form method="POST" action="">
+        {{ form.hidden_tag() if form.hidden_tag }} {% for f in form if f.type != 'CSRFTokenField' %}
+        <div>
+            {{ f.label }} {{ f}} {% if f.errors %}
             <ul>
                 {% for e in f.errors %}
                 <li>{{ e }}</li>
                 {% endfor %}
             </ul>
             {% endif %}
-            </div>
-            {% endfor %}
-            <button class="btn" type="submit">{{ gettext('Submit') }}</button>
-        </form>
-        {{ link | safe }}
-        {% endif %}
-    </div>
+        </div>
+        {% endfor %}
+        <button class="btn" type="submit">{{ gettext('Submit') }}</button>
+    </form>
+    {{ link | safe }} {% endif %}
+</div>
 
-    <a class="btn btn-primary" href="/"><i class="icon-arrow-left icon-white"></i> Back</a>
+<a class="btn btn-primary" href="/">
+    <i class="icon-arrow-left icon-white"></i> Back</a>
 </div>
 {% endblock body %}
